@@ -1,57 +1,35 @@
 pipeline {
     agent any
     tools {
-      maven 'maven_home'
-    }	
+        maven 'maven home'
+           }
     environment {
       DOCKER_TAG = getVersion()
     }
     stages {
-        stage('SCM Checkout') { 
-            steps{
-				git branch: 'main', credentialsId: 'git-credentials', 
-					url: 'https://github.com/vikas99341/K8S-pipeline.git'
+        stage('SCM-Checkout') { 
+            steps {
+				git branch: 'main', credentialsId: 'f191d72a-388e-4716-ba7d-fbef443b8cca', url: 'https://github.com/tnorbertgithub/K8S-pipeline.git'
             }
         }
-        stage('Maven Build'){
-            steps{
-                sh "mvn clean package"
+        stage('Maven-package'){
+            steps {
+                sh "mvn clean compile package"
             }
         }
-        stage('Docker Build'){
-            steps{
+        stage('Docker-Build'){
+            steps {
                 sh "docker build . -t vikas24775/nodeapp:${DOCKER_TAG} "
             }
         }
-        stage('Push Docker Image') { 
+        stage('Docker Push') { 
             steps {
-				withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerhubpassword')]) {
-					sh "docker login -u vikas24775 -p ${dockerhubpassword}"
+				withCredentials([string(credentialsId: 'DockerHubCredential', variable: 'DockerHubPwd')]) {
+				sh "docker login -u tnorbert -p ${DockerHubpwd}"
+		        sh "docker push vikas24775/nodeapp:${DOCKER_TAG} "
 				}
-                sh "docker push vikas24775/nodeapp:${DOCKER_TAG} "
             }
-        }
-        stage('Ansible Deploy'){
-            steps{
-              ansiblePlaybook credentialsId: 'ansible-playbook', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${DOCKER_TAG}", installation: 'ansible_home', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
-            }
-        }
-        stage('Deploy to k8s'){
-            steps{
-              sh "chmod +x changeTag.sh"
-              sh "./changeTag.sh ${DOCKER_TAG}"
-              sshagent(['ansible-playbook']) {
-                    sh "scp -o StrictHostKeyChecking=no services.yml node-app-pod.yml ec2-user@3.83.138.229:/home/ec2-user/"
-                }
-		script{
-			try{
-				sh "sudo ssh ec2-user@3.83.138.229 kubectl apply -f ."
-			}catch(error){
-				 sh "sudo ssh ec2-user@3.83.138.229 kubectl create -f ."
-			}
-		 }
-              }
-        }
+        }    
     }
 }
 def getVersion(){
