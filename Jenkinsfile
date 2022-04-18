@@ -26,7 +26,7 @@ pipeline {
             steps {
 				withCredentials([string(credentialsId: 'DockerHubCredential', variable: 'DockerHubPwd')]) {
 				sh "docker login -u tnorbert -p ${DockerHubpwd}"
-		        sh "docker push vikas24775/nodeapp:${DOCKER_TAG} "
+		        sh "docker push tnorbert/nodeapp:${DOCKER_TAG} "
 				}
             }
         }    
