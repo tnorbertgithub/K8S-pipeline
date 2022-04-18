@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Docker-Build'){
             steps {
-                sh "docker build . -t vikas24775/nodeapp:${DOCKER_TAG} "
+                sh "docker build . -t tnorbert/nodeapp:${DOCKER_TAG} "
             }
         }
         stage('Docker Push') { 
