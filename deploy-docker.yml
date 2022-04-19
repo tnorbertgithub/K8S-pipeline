@@ -21,7 +21,7 @@
         state: present
     - name: Start the container
       docker_container:
-        name: nodeapp
+        name: k8s-app
         image: "tnorbert/k8s-app:{{DOCKER_TAG}}"           
         state: started
         published_ports:
