@@ -29,7 +29,12 @@ pipeline {
 		        sh "docker push tnorbert/nodeapp:${DOCKER_TAG} "
 				}
             }
-        }    
+        }
+	stage('Ansible Deploy'){
+            steps{
+            ansiblePlaybook credentialsId: 'EC2-USER', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${DOCKER_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
+            }
+        }
     }
 }
 def getVersion(){
